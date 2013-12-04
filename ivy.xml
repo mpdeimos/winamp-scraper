@@ -25,4 +25,5 @@
         status="integration">
 	</info>
 	<dependency org="com.google.code.gson" name="gson" rev="2.2.4" />
+	<dependency org="org.apache.httpcomponents" name="httpclient" rev="4.3.1" />
 </ivy-module>
