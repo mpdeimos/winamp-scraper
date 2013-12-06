@@ -26,4 +26,5 @@
 	</info>
 	<dependency org="com.google.code.gson" name="gson" rev="2.2.4" />
 	<dependency org="org.apache.httpcomponents" name="httpclient" rev="4.3.1" />
+	<dependency org="org.jsoup" name="jsoup" rev="1.7.3" />
 </ivy-module>

@@ -2,12 +2,9 @@ package com.mpdeimos.winampscraper;
 
 import java.io.IOException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 /**
  * Main entry point for scraping winamp.com plugin, skin and visualization
@@ -18,13 +15,15 @@ import org.apache.http.util.EntityUtils;
 public class Main {
 	public static final String SAMPLE_URL = "http://www.winamp.com/plugin/details/222431";
 
-	public static void main(String[] args) throws ClientProtocolException,
-			IOException {
+	public static void main(String[] args) throws IOException {
 
-		HttpClient client = HttpClients.createDefault();
-		HttpGet request = new HttpGet(SAMPLE_URL);
-		HttpResponse response = client.execute(request);
+		Document doc = Jsoup.connect(SAMPLE_URL).get();
+		Element head = doc.getElementsByTag("title").first();
+		String text = head.text();
+		System.out.println(text.substring(0, text.length() - 9)); // removes
+																	// " - Winamp"
 
-		System.out.println(EntityUtils.toString(response.getEntity()));
+		System.out.println(doc.select(".skinSimilar").first().child(0).text());
+
 	}
 }
