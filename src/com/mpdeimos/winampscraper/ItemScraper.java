@@ -9,6 +9,7 @@ import org.jsoup.nodes.Element;
 import com.mpdeimos.winampscraper.model.EItemType;
 import com.mpdeimos.winampscraper.model.Item;
 import com.mpdeimos.winampscraper.util.Collections;
+import com.mpdeimos.winampscraper.util.Html;
 import com.mpdeimos.winampscraper.util.Strings;
 
 /**
@@ -48,7 +49,14 @@ public class ItemScraper
 		Item item = new Item();
 		item.ID = this.id;
 
-		this.scrape(item, doc);
+		try
+		{
+			this.scrape(item, doc);
+		}
+		catch (IllegalArgumentException e)
+		{
+			return null;
+		}
 
 		return item;
 	}
@@ -57,12 +65,16 @@ public class ItemScraper
 	private void scrape(Item item, Document doc) throws ScraperException
 	{
 		// scrape title
-		Element head = doc.getElementsByTag("title").first();
-		ScraperException.ifNull(head, "head");
-		item.name = Strings.stripSuffix(head.text(), " - Winamp");
+		Element head = Html.firstElementByTag(doc, "title");
+		item.name = Strings.stripSuffix(head.text(), "- Winamp").trim();
 
-		Element similar = doc.select(".skinSimilar").first();
-		ScraperException.ifNull(similar, "similar box");
+		if (item.name.isEmpty())
+		{
+			throw new IllegalArgumentException("Item " + item.ID
+					+ " does not exist");
+		}
+
+		Element similar = Html.firstElement(doc, ".skinSimilar");
 		if (similar.children().size() < 3)
 		{
 			throw new ScraperException("Not enough elements in 'similar box'");
@@ -74,6 +86,12 @@ public class ItemScraper
 		// scrape categories
 		Collections.addIfNotEmpty(item.categories, similar.child(1).text());
 		Collections.addIfNotEmpty(item.categories, similar.child(2).text());
+
+		// scrape user id
+		Element skinMain = Html.firstElement(doc, ".skinMain");
+		String userLink = Html.firstElement(skinMain, "dt > b > a")
+				.attr("href");
+		item.userID = Integer.parseInt(userLink.replaceAll(".*/", ""));
 	}
 
 	/** Scrapes the type of an item. */

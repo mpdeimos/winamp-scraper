@@ -22,4 +22,7 @@ public class Item
 	/** The categories of the item. */
 	public List<String> categories = new ArrayList<>();
 
+	/** The ID of the user who created the item. */
+	public int userID;
+
 }

@@ -1,6 +1,8 @@
 package com.mpdeimos.winampscraper;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.google.gson.Gson;
 
@@ -15,22 +17,34 @@ public class Main
 
 	public static void main(String[] args) throws IOException, ScraperException
 	{
-		Gson gson = new Gson();
+		ExecutorService executor = Executors.newFixedThreadPool(16);
+		executor.submit(createScraper(222431));
+		executor.submit(createScraper(221984));
+		executor.submit(createScraper(222088));
+		executor.submit(createScraper(222647));
+		executor.shutdown();
+	}
 
-		// skin
-		ItemScraper scraper = new ItemScraper(222431);
-		System.out.println(gson.toJson(scraper.scrape()));
+	private static Runnable createScraper(final int id) throws IOException,
+			ScraperException
+	{
+		return new Runnable()
+		{
 
-		// plugin
-		scraper = new ItemScraper(221984);
-		System.out.println(gson.toJson(scraper.scrape()));
-
-		// visualization
-		scraper = new ItemScraper(222088);
-		System.out.println(gson.toJson(scraper.scrape()));
-
-		// online service
-		scraper = new ItemScraper(222647);
-		System.out.println(gson.toJson(scraper.scrape()));
+			@Override
+			public void run()
+			{
+				ItemScraper scraper = new ItemScraper(id);
+				Gson gson = new Gson();
+				try
+				{
+					System.out.println(gson.toJson(scraper.scrape()));
+				}
+				catch (IOException | ScraperException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		};
 	}
 }
