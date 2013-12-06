@@ -2,9 +2,7 @@ package com.mpdeimos.winampscraper;
 
 import java.io.IOException;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
+import com.google.gson.Gson;
 
 /**
  * Main entry point for scraping winamp.com plugin, skin and visualization
@@ -12,18 +10,27 @@ import org.jsoup.nodes.Element;
  * 
  * @author mpdeimos
  */
-public class Main {
-	public static final String SAMPLE_URL = "http://www.winamp.com/plugin/details/222431";
+public class Main
+{
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, ScraperException
+	{
+		Gson gson = new Gson();
 
-		Document doc = Jsoup.connect(SAMPLE_URL).get();
-		Element head = doc.getElementsByTag("title").first();
-		String text = head.text();
-		System.out.println(text.substring(0, text.length() - 9)); // removes
-																	// " - Winamp"
+		// skin
+		ItemScraper scraper = new ItemScraper(222431);
+		System.out.println(gson.toJson(scraper.scrape()));
 
-		System.out.println(doc.select(".skinSimilar").first().child(0).text());
+		// plugin
+		scraper = new ItemScraper(221984);
+		System.out.println(gson.toJson(scraper.scrape()));
 
+		// visualization
+		scraper = new ItemScraper(222088);
+		System.out.println(gson.toJson(scraper.scrape()));
+
+		// online service
+		scraper = new ItemScraper(222647);
+		System.out.println(gson.toJson(scraper.scrape()));
 	}
 }
