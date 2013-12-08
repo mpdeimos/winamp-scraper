@@ -4,13 +4,12 @@ import java.io.IOException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
-import com.mpdeimos.winampscraper.model.EItemType;
-import com.mpdeimos.winampscraper.model.Item;
-import com.mpdeimos.winampscraper.util.Collections;
-import com.mpdeimos.winampscraper.util.Html;
-import com.mpdeimos.winampscraper.util.Strings;
+import com.mpdeimos.webscraper.Scraper;
+import com.mpdeimos.webscraper.Scraper.Builder;
+import com.mpdeimos.webscraper.ScraperException;
+import com.mpdeimos.webscraper.validation.Validator.ScraperValidationException;
+import com.mpdeimos.winampscraper.model.Download;
 
 /**
  * Parses a Winamp plugin, skin, etc. website and parses all relevant
@@ -41,73 +40,31 @@ public class ItemScraper
 	 * @throws ScraperException
 	 *             If any other scraping error occurs.
 	 */
-	public Item scrape() throws IOException, ScraperException
+	public Download scrape() throws IOException, ScraperException
 	{
 		String url = String.format(ITEM_URL_TEMPLATE, this.id);
 		Document doc = Jsoup.connect(url).get();
 
-		Item item = new Item();
+		Download item = new Download();
 		item.ID = this.id;
 
 		try
 		{
-			this.scrape(item, doc);
+			Builder builder = new Scraper.Builder();
+			Scraper scraper = builder.setSource(doc).setDestination(item)
+					.build();
+			scraper.scrape();
 		}
-		catch (IllegalArgumentException e)
+		catch (ScraperValidationException e)
 		{
-			return null;
+			// if the validation failed for scraping the title, return null
+			if (e.getField().getName().equals("name"))
+			{
+				return null;
+			}
+			throw e;
 		}
 
 		return item;
-	}
-
-	/** Scrapes the item from data of the given html document. */
-	private void scrape(Item item, Document doc) throws ScraperException
-	{
-		// scrape title
-		Element head = Html.firstElementByTag(doc, "title");
-		item.name = Strings.stripSuffix(head.text(), "- Winamp").trim();
-
-		if (item.name.isEmpty())
-		{
-			throw new IllegalArgumentException("Item " + item.ID
-					+ " does not exist");
-		}
-
-		Element similar = Html.firstElement(doc, ".skinSimilar");
-		if (similar.children().size() < 3)
-		{
-			throw new ScraperException("Not enough elements in 'similar box'");
-		}
-
-		// scrape type
-		item.type = scrapeItemType(similar);
-
-		// scrape categories
-		Collections.addIfNotEmpty(item.categories, similar.child(1).text());
-		Collections.addIfNotEmpty(item.categories, similar.child(2).text());
-
-		// scrape user id
-		Element skinMain = Html.firstElement(doc, ".skinMain");
-		String userLink = Html.firstElement(skinMain, "dt > b > a")
-				.attr("href");
-		item.userID = Integer.parseInt(userLink.replaceAll(".*/", ""));
-	}
-
-	/** Scrapes the type of an item. */
-	private EItemType scrapeItemType(Element similar) throws ScraperException
-	{
-		Element child = similar.child(0);
-		String text = child.text();
-		for (EItemType type : EItemType.values())
-		{
-			if (text.contains(type.getDisplayName()))
-			{
-				return type;
-			}
-		}
-
-		throw new ScraperException("Item type cannot be determined from: "
-				+ text);
 	}
 }

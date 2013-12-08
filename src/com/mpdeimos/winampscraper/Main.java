@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.google.gson.Gson;
+import com.mpdeimos.webscraper.ScraperException;
 
 /**
  * Main entry point for scraping winamp.com plugin, skin and visualization
@@ -18,6 +19,7 @@ public class Main
 	public static void main(String[] args) throws IOException, ScraperException
 	{
 		ExecutorService executor = Executors.newFixedThreadPool(16);
+		executor.submit(createScraper(1));
 		executor.submit(createScraper(222431));
 		executor.submit(createScraper(221984));
 		executor.submit(createScraper(222088));
@@ -40,7 +42,7 @@ public class Main
 				{
 					System.out.println(gson.toJson(scraper.scrape()));
 				}
-				catch (IOException | ScraperException e)
+				catch (Exception e)
 				{
 					e.printStackTrace();
 				}
