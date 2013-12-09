@@ -1,11 +1,7 @@
 package com.mpdeimos.winampscraper;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import com.google.gson.Gson;
-import com.mpdeimos.webscraper.ScraperException;
 
 /**
  * Main entry point for scraping winamp.com plugin, skin and visualization
@@ -16,37 +12,17 @@ import com.mpdeimos.webscraper.ScraperException;
 public class Main
 {
 
-	public static void main(String[] args) throws IOException, ScraperException
+	/** Main program execution. */
+	public static void main(String[] args)
 	{
 		ExecutorService executor = Executors.newFixedThreadPool(16);
-		executor.submit(createScraper(1));
-		executor.submit(createScraper(222431));
-		executor.submit(createScraper(221984));
-		executor.submit(createScraper(222088));
-		executor.submit(createScraper(222647));
+		// for (int i = 0; i < 10000; i++)
+		// executor.submit(new DownloadScraper(i));
+		executor.submit(new DownloadScraper(1));
+		executor.submit(new DownloadScraper(222431));
+		executor.submit(new DownloadScraper(221984));
+		executor.submit(new DownloadScraper(222088));
+		executor.submit(new DownloadScraper(222647));
 		executor.shutdown();
-	}
-
-	private static Runnable createScraper(final int id) throws IOException,
-			ScraperException
-	{
-		return new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				ItemScraper scraper = new ItemScraper(id);
-				Gson gson = new Gson();
-				try
-				{
-					System.out.println(gson.toJson(scraper.scrape()));
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		};
 	}
 }
