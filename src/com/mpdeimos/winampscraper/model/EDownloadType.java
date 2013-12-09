@@ -14,6 +14,7 @@ public enum EDownloadType implements ScrapedEnum
 
 	/** Skin download type. */
 	SKIN,
+
 	/** Visualization download type. */
 	VISUALIZATION,
 
