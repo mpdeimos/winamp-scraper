@@ -5,7 +5,7 @@ import com.mpdeimos.webscraper.Scraper.Builder;
 import com.mpdeimos.webscraper.ScraperException;
 import com.mpdeimos.webscraper.util.Strings;
 import com.mpdeimos.webscraper.validation.Validator.ScraperValidationException;
-import com.mpdeimos.winampscraper.App;
+import com.mpdeimos.winampscraper.ILogger;
 import com.mpdeimos.winampscraper.model.Download;
 
 import java.io.File;
@@ -48,20 +48,23 @@ public class DownloadScraper implements Callable<Integer>
 	/** Amount of retries to execute a query. */
 	private int retries = 0;
 
+	/** The logger for error output. */
+	private final ILogger logger;
+
 	/** Constructor. */
-	public DownloadScraper(int id)
+	public DownloadScraper(int id, ILogger logger)
 	{
 		this.id = id;
+		this.logger = logger;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public Integer call()
 	{
-		DownloadScraper scraper = new DownloadScraper(this.id);
 		try
 		{
-			Download item = scraper.scrape();
+			Download item = this.scrape();
 			if (item != null)
 			{
 				persistItem(item);
@@ -203,7 +206,7 @@ public class DownloadScraper implements Callable<Integer>
 	/** Logs an exception to the application log. */
 	private void logException(Exception e)
 	{
-		App.getApp().log("Scraping download item " + this.id + ": " //$NON-NLS-1$ //$NON-NLS-2$
+		this.logger.log("Scraping download item " + this.id + ": " //$NON-NLS-1$ //$NON-NLS-2$
 				+ e.getMessage() + " " + e.getClass()); //$NON-NLS-1$
 	}
 
@@ -217,7 +220,7 @@ public class DownloadScraper implements Callable<Integer>
 			return null;
 		}
 
-		App.getApp().log(String.format("Socket timeout, retry %d/%d", //$NON-NLS-1$
+		this.logger.log(String.format("Socket timeout, retry %d/%d", //$NON-NLS-1$
 				this.retries,
 				MAX_RETRIES));
 		try

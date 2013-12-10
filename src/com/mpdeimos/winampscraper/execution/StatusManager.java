@@ -1,7 +1,7 @@
 package com.mpdeimos.winampscraper.execution;
 
 import com.mpdeimos.webscraper.util.Assert;
-import com.mpdeimos.winampscraper.App;
+import com.mpdeimos.winampscraper.ILogger;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +31,16 @@ public class StatusManager
 	/** The application status from the last execution. */
 	private Status status = new Status();
 
+	/** The logger being used for error output. */
+	private final ILogger logger;
+
+	/** Constructor. */
+	public StatusManager(ILogger logger)
+	{
+		this.logger = logger;
+
+	}
+
 	/** Adds a download future for progress monitoring. */
 	public void addDownloadFuture(Future<Integer> future)
 	{
@@ -52,7 +62,7 @@ public class StatusManager
 		}
 		catch (IOException e)
 		{
-			App.getApp().log("could not read status file."); //$NON-NLS-1$
+			this.logger.log("could not read status file."); //$NON-NLS-1$
 		}
 	}
 
@@ -101,7 +111,7 @@ public class StatusManager
 		}
 		catch (IOException e)
 		{
-			App.getApp().log("Could not write status file."); //$NON-NLS-1$
+			this.logger.log("Could not write status file."); //$NON-NLS-1$
 		}
 	}
 

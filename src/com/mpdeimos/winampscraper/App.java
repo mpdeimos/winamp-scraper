@@ -26,11 +26,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 /**
- * Application UI class.
+ * Application UI class with a logging window.
  * 
  * @author mpdeimos
  */
-public class App extends JFrame
+public class App extends JFrame implements ILogger
 {
 	/**
 	 * as of 2013-12-09:
@@ -46,9 +46,6 @@ public class App extends JFrame
 	 */
 	private static final int MAX_ITEMS = 223000;
 
-	/** Singleton instance of the app. */
-	public static App app;
-
 	/** The executor service. */
 	private final PauseableThreadPoolExecutor executor = new PauseableThreadPoolExecutor(
 			16);
@@ -60,7 +57,7 @@ public class App extends JFrame
 	private final Timer monitor = new Timer();
 
 	/** The status manager for persisting and retrieving the application status. */
-	private final StatusManager statusManager = new StatusManager();
+	private final StatusManager statusManager = new StatusManager(this);
 
 	/**
 	 * Launch the application.
@@ -75,7 +72,7 @@ public class App extends JFrame
 			@Override
 			public void run()
 			{
-				app = new App();
+				App app = new App();
 				app.setVisible(true);
 			}
 		});
@@ -137,17 +134,14 @@ public class App extends JFrame
 		catch (ClassNotFoundException | InstantiationException
 				| IllegalAccessException | UnsupportedLookAndFeelException e)
 		{
-			Assert.notCaught(e, "native look and feel is recent in JREs."); //$NON-NLS-1$
+			Assert.notCaught(
+					e,
+					"native look and feel is available in recent JREs."); //$NON-NLS-1$
 		}
 	}
 
-	/** @return The singleton instance of the application. */
-	public static App getApp()
-	{
-		return app;
-	}
-
 	/** Adds a message to the logging output. */
+	@Override
 	public void log(String message)
 	{
 		this.output.append(message + "\n"); //$NON-NLS-1$
@@ -167,7 +161,7 @@ public class App extends JFrame
 			else
 			{
 				Future<Integer> feature = this.executor.submit(new DownloadScraper(
-						i));
+						i, this));
 				this.statusManager.addDownloadFuture(feature);
 			}
 		}
