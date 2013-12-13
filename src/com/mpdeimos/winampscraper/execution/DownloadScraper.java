@@ -7,6 +7,7 @@ import com.mpdeimos.webscraper.util.Strings;
 import com.mpdeimos.webscraper.validation.Validator.ScraperValidationException;
 import com.mpdeimos.winampscraper.ILogger;
 import com.mpdeimos.winampscraper.model.Download;
+import com.mpdeimos.winampscraper.model.EDownloadType;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,26 +90,27 @@ public class DownloadScraper implements Callable<Integer>
 		File itemFolder = new File(DownloadScraper.downloadFolder,
 				Integer.toString(item.ID));
 		itemFolder.mkdirs();
-		for (File child : itemFolder.listFiles())
-		{
-			child.delete();
-		}
 
-		item.thumbnail = downloadData(item.thumbnail, itemFolder, "thumb_"); //$NON-NLS-1$
-		item.screenshot = downloadData(item.screenshot, itemFolder);
+		item.thumbnail = downloadData(
+				item.thumbnailOriginal,
+				itemFolder, "thumb_"); //$NON-NLS-1$
+		item.screenshot = downloadData(item.screenshotOriginal, itemFolder);
 
-		HttpURLConnection connection;
-		try
+		if (item.type != EDownloadType.ONLINE_SERVICE)
 		{
-			URL url = new URL(item.download);
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setInstanceFollowRedirects(false);
-			String download = connection.getHeaderField("Location"); //$NON-NLS-1$
-			item.download = downloadData(download, itemFolder);
-		}
-		catch (IOException e)
-		{
-			logException(e);
+			HttpURLConnection connection;
+			try
+			{
+				URL url = new URL(item.downloadOriginal);
+				connection = (HttpURLConnection) url.openConnection();
+				connection.setInstanceFollowRedirects(false);
+				item.downloadOriginal = connection.getHeaderField("Location"); //$NON-NLS-1$
+				item.download = downloadData(item.downloadOriginal, itemFolder);
+			}
+			catch (IOException e)
+			{
+				logException(e);
+			}
 		}
 
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -133,15 +135,20 @@ public class DownloadScraper implements Callable<Integer>
 
 		try
 		{
-			InputStream input = new URL(url).openStream();
 			String filename = getFilename(url);
 			if (filePrefix != null)
 			{
 				filename = filePrefix + filename;
 			}
+			File file = new File(itemFolder, filename);
+			if (file.exists())
+			{
+				return filename;
+			}
+			InputStream input = new URL(url).openStream();
 			Files.copy(
 					input,
-					new File(itemFolder, filename).toPath());
+					file.toPath());
 			input.close();
 
 			return filename;
@@ -149,7 +156,7 @@ public class DownloadScraper implements Callable<Integer>
 		catch (IOException e)
 		{
 			logException(e);
-			return url;
+			return null;
 		}
 	}
 

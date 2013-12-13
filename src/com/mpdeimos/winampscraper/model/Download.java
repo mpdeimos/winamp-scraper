@@ -1,11 +1,11 @@
 package com.mpdeimos.winampscraper.model;
 
-import java.util.Date;
-
 import com.mpdeimos.webscraper.Scrape;
 import com.mpdeimos.webscraper.conversion.DateFormatConverter;
 import com.mpdeimos.webscraper.conversion.NumberFormatConverter;
 import com.mpdeimos.webscraper.validation.NotEmptyValidator;
+
+import java.util.Date;
 
 /**
  * Model class holding information about downloadable items.
@@ -38,7 +38,7 @@ public class Download
 	/** The submission date of the item. */
 	@Scrape(value = ".skinMain dl dt", resultIndex = 2,
 			convertor = DateFormatConverter.class)
-	@DateFormatConverter.Option("MMM DD, YYY")
+	@DateFormatConverter.Option("MMM dd, yyyy")
 	public Date date;
 
 	/** The amount of downloads for the item. */
@@ -48,14 +48,25 @@ public class Download
 
 	/** The item thumbnail. */
 	@Scrape(value = ".skinMain > .lftDiv > a > img", attribute = "src")
+	/** The item thumbnail. */
+	public String thumbnailOriginal;
+
+	/** The downloaded item thumbnail. */
 	public String thumbnail;
 
 	/** The item screenshot. */
 	@Scrape(value = ".lftDetail > a > img", attribute = "src")
+	/** The item screenshot. */
+	public String screenshotOriginal;
+
+	/** The downloaded item screenshot. */
 	public String screenshot;
 
 	/** The item download (executable, skin, etc.) */
 	@Scrape(value = ".skinMain > .lftDiv > a", attribute = "href")
+	public String downloadOriginal;
+
+	/** The downloaded download file name. */
 	public String download;
 
 	/** The title of the item description. */

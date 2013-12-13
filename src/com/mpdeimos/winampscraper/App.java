@@ -89,9 +89,20 @@ public class App extends JFrame implements ILogger
 			@Override
 			public void windowClosing(WindowEvent evt)
 			{
+
+			}
+		});
+		this.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent evt)
+			{
 				App.this.monitor.cancel();
 				App.this.executor.shutdownNow();
-				App.this.statusManager.persist();
+				if (App.this.executor.getTaskCount() > 0)
+				{
+					App.this.statusManager.persist();
+				}
 			}
 		});
 
@@ -135,8 +146,7 @@ public class App extends JFrame implements ILogger
 				| IllegalAccessException | UnsupportedLookAndFeelException e)
 		{
 			Assert.notCaught(
-					e,
-					"native look and feel is available in recent JREs."); //$NON-NLS-1$
+					e, "native look and feel is available in recent JREs."); //$NON-NLS-1$
 		}
 	}
 
