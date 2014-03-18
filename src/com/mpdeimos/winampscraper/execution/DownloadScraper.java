@@ -191,10 +191,8 @@ public class DownloadScraper implements Callable<Integer>
 
 		try
 		{
-			Builder builder = new Scraper.Builder();
-			Scraper scraper = builder.setSource(doc).setTarget(item)
-					.build();
-			scraper.scrape();
+			Builder builder = new Scraper.Builder(doc, item);
+			builder.build().scrape();
 		}
 		catch (ScraperValidationException e)
 		{

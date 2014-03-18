@@ -60,10 +60,9 @@ public class check
 		try
 		{
 			Document doc = Jsoup.connect(url).get();
-			Builder builder = new Scraper.Builder();
 			d d = new d();
-			Scraper scraper = builder.setSource(doc).setTarget(d)
-					.build();
+			Builder builder = new Scraper.Builder(doc, d);
+			Scraper scraper = builder.build();
 			scraper.scrape();
 			item.date = d.date;
 

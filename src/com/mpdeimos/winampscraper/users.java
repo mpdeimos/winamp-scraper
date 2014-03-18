@@ -71,9 +71,8 @@ public class users
 			User user = new User(item.userID);
 			String url = String.format(ITEM_URL_TEMPLATE, item.userID);
 			Document doc = Jsoup.connect(url).get();
-			Builder builder = new Scraper.Builder();
-			Scraper scraper = builder.setSource(doc).setTarget(user)
-					.build();
+			Builder builder = new Scraper.Builder(doc, user);
+			Scraper scraper = builder.build();
 			scraper.scrape();
 			return user;
 		}
